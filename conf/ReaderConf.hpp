@@ -1,6 +1,6 @@
 #if !defined(READERCONF_HPP)
 #define READERCONF_HPP
-#include "../include/webserv.hpp"
+#include "webserv.hpp"
 #define READER_BUFFER_SIZE 1024
 
 typedef std::vector<std::string> filevector;

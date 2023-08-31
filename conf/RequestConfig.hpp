@@ -1,7 +1,7 @@
 #if !defined(REQUEST_CONFIG_HPP)
 #define REQUEST_CONFIG_HPP
 
-#include "../include/webserv.hpp"
+#include "webserv.hpp"
 // #include "../request/Request.hpp"
 #include "config.hpp"
 

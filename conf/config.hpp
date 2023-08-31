@@ -1,7 +1,7 @@
 #if !defined(CONFIG_HPP)
 #define CONFIG_HPP
 
-#include "../include/webserv.hpp"
+#include "webserv.hpp"
 #include "StructData.hpp"
 #include "HelperFunc.hpp"
 #include "ReaderConf.hpp"

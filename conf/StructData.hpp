@@ -2,7 +2,7 @@
 
 #define STRUCTDATA_HPP
 
-#include "../include/webserv.hpp"
+#include "webserv.hpp"
 
 # define parseMap std::map<std::string, void (ConfigServer::*)(filevector)>
 

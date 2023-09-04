@@ -40,7 +40,7 @@ std::vector<ConfigServer> Config::getServer() const
 //     return true;
 // }
 
-int Config::parse(const char *filename)
+int Config::parse(const char *filename, confData &data)
 {
     filevector file;
     unsigned int filesize;
@@ -72,8 +72,8 @@ int Config::parse(const char *filename)
             return 1;
         }   
     }
-    std::cout << this->_server[0] << '\n';  
-    exit(1);
+    // std::cout << this->_server[0] << '\n';
+    data.server = this->_server;
 
     return 0;
 }

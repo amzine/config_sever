@@ -6,9 +6,10 @@
 #include "HelperFunc.hpp"
 #include "ReaderConf.hpp"
 #include "ConfigServer.hpp"
+#include "../Includes/Includes.hpp"
 // #include "../request/Request.hpp"
 // #include "RequestConfig.hpp"
-
+class confData;
 class RequestConfiga;
 class Config
 {
@@ -19,7 +20,7 @@ public:
     Config(){}
     Config(std::string defaultserverPath);
     virtual ~Config(); 
-    int parse(const char* filename);
+    int parse(const char* filename, confData &);
     std::vector<ConfigServer> getServer() const;
     bool checkfile(filevector file);
     // RequestConfiga   getConfigForRequest(t_listen const adress, std::string const uri, std::string hostname, const std::string &methodt) const;

@@ -11,6 +11,5 @@ class ConfigServer;
 
 typedef struct	s_listen {
 	std::string	host;
-	int			port;
+	std::string	port;
 }				t_listen;
-

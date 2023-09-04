@@ -26,12 +26,12 @@ parseMap ConfigServer::_initServerMap()
     map["server_name"] = &ConfigServer::addServerName;
     map["error_page"] = &ConfigServer::addErrorPage;
     map["body_size"] = &ConfigServer::addclientbodybuffersize;
-    map["cgi_param"] = &ConfigServer::addCgiparams;
     map["cgi_pass"] = &ConfigServer::addCgipass;
     map["methods"] = &ConfigServer::addAllowedmethod;
     map["index"] = &ConfigServer::addIndex;
     map["autoindex"] = &ConfigServer::addAutoindex;
     map["upload_pass"] = &ConfigServer::addUpload;
+    map["cgi"] = &ConfigServer::addCgi;
     return map;
 }
 
@@ -43,13 +43,14 @@ parseMap ConfigServer::_initLocationMap()
     map["root"] = &ConfigServer::addRoot;
     map["error_page"] = &ConfigServer::addErrorPage;
     map["body_size"] = &ConfigServer::addclientbodybuffersize;
-    map["cgi_param"] = &ConfigServer::addCgiparams;
     map["cgi_pass"] = &ConfigServer::addCgipass;
     map["methods"] = &ConfigServer::addAllowedmethod;
     map["index"] = &ConfigServer::addIndex;
     map["autoindex"] = &ConfigServer::addAutoindex;
     map["alias"] = &ConfigServer::addAlias;
     map["upload_pass"] = &ConfigServer::addUpload;
+    map["cgi"] = &ConfigServer::addCgi;
+
     return map;
 }
 
@@ -174,11 +175,11 @@ void    ConfigServer::passMembers(ConfigServer &server) const
         if (server._cgi_pass == "")
             server._cgi_pass = this->_cgi_pass;
         if (server._allowed_methods.empty())
-            server._allowed_methods = this->_allowed_methods;
+            server._allowed_methods = this->_allowed_methods;  
         server._index.insert(server._index.begin(), this->_index.begin(), this->_index.end());
     }
     for (std::map<std::string, ConfigServer>::iterator i = server._location.begin(); i != server._location.end(); i++)
-        server.passMembers(i->second); 
+        server.passMembers(i->second);
 }
 int     ConfigServer::parseLocation(unsigned int &index, filevector &file)
 {
@@ -248,6 +249,9 @@ void ConfigServer::addlisten(std::vector<std::string> args)
     // exit(1);
     if (args.size() != 1)
     {
+
+        std::cout << "messi" << std::endl;
+
         throw ConfigServer::InvalidArgumentsException();
 
     }
@@ -273,10 +277,11 @@ void ConfigServer::addlisten(std::vector<std::string> args)
     {
         listen.host = args[0].substr(0, sep);
         sep++;
-        std::string portstr = args[0].substr(sep);
+        size_t nm = args[0].find(";"); 
+        std::string portstr = args[0].substr(sep, 4);
         if (isDigits(portstr))
         {
-            listen.port = atoi(portstr.c_str());
+            listen.port = portstr.c_str();
             this->_listen.push_back(listen);
             return ;
         }
@@ -288,16 +293,24 @@ void ConfigServer::addRoot(std::vector<std::string> args)
 {
     size_t sep;
     if (args.size() != 1 || this->_root != "")
+    {
+        // std::cout << "messi" << std::endl;
+
         throw ConfigServer::InvalidArgumentsException();
+    }
     sep = args[0].find(";");
     this->_root = args[0].substr(0, sep);
 }
 
 void ConfigServer::addServerName(std::vector<std::string> args)
 {
-    if(args.size() == 0)
+    if(args.size() != 1)
+    {
+        // std::cout << "messi" << std::endl;
         throw ConfigServer::InvalidArgumentsException();
-    size_t sep = args[0].find(";");    
+
+    }
+    size_t sep = args[0].find(";"); 
     for (unsigned int i = 0; i < args.size(); i++)
         this->_server_name.push_back(args[i].substr(0, sep));
 }
@@ -321,8 +334,9 @@ void    ConfigServer::addErrorPage(std::vector<std::string> args)
     }
     if (uri == "")
         throw ConfigServer::InvalidArgumentsException();
+    size_t sep = uri.find(";");     
     for (std::vector<int>::iterator i = codes.begin(); i != codes.end(); i++)
-        this->_error_page[*i] = uri;
+        this->_error_page[*i] = uri.substr(0, sep);
 }
 
 void    ConfigServer::addclientbodybuffersize(std::vector<std::string> args)
@@ -343,14 +357,29 @@ void    ConfigServer::addCgiparams(std::vector<std::string> args)
 
 void ConfigServer::addCgipass(std::vector<std::string> args)
 {
-    if (args.empty())
+    if (args.empty() || args.size() != 1)
         throw ConfigServer::InvalidArgumentsException();
     size_t sep = args[0].find(";");    
     this->_cgi_pass = args[0].substr(0, sep);
 }
 void ConfigServer::addAllowedmethod(std::vector<std::string> args)
 {
-    if (args.empty())
+    for (std::vector<std::string>::iterator i = args.begin(); i != args.end(); i++)
+    {
+        size_t sep = i->find(";");
+        *i = i->substr(0, sep);
+        if (*i == "GET")
+           continue;
+        else if (*i == "POST")
+           continue;
+        else if (*i == "DELETE")
+           continue;
+        else
+            throw ConfigServer::InvalidArgumentsException();          
+    }
+    
+    
+    if (args.empty() || args.size() > 3)
         throw ConfigServer::InvalidArgumentsException();
     this->_allowed_methods.clear();
     for (filevector::iterator i = args.begin(); i < args.end(); i++)
@@ -362,7 +391,7 @@ void ConfigServer::addAllowedmethod(std::vector<std::string> args)
 
 void ConfigServer::addIndex(std::vector<std::string> args)
 {
-    if (args.empty())
+    if (args.empty() || args.size() != 1)
         throw ConfigServer::InvalidArgumentsException();
     size_t sep = args[0].find(";");
     args[0] = args[0].substr(0, sep);
@@ -380,7 +409,8 @@ void    ConfigServer::addAlias(std::vector<std::string> args)
 
 void ConfigServer::addAutoindex(std::vector<std::string> args)
 {
-    if (args.empty())
+    // std::cout << RED << args[0] << RESET << std::endl;
+    if (args.empty() || args.size() != 1)
         throw ConfigServer::InvalidArgumentsException();
     size_t sep = args[0].find(";");
     args[0] = args[0].substr(0, sep);
@@ -399,6 +429,29 @@ void ConfigServer::addUpload(std::vector<std::string> args)
     size_t sep = args[0].find(";");
     args[0] = args[0].substr(0, sep);
     this->_uploadPass = args[0];
+}
+
+void ConfigServer::addCgi(std::vector<std::string> args)
+{
+    if (args.empty() || args.size() > 2)
+        throw ConfigServer::InvalidArgumentsException();
+    for (std::vector<std::string>::iterator i = args.begin(); i != args.end(); i++)
+    {
+        size_t sep = i->find(";");
+        *i = i->substr(0, sep);
+        if (*i == "py")
+           continue;
+        else if (*i == "php")
+           continue;
+        else
+            throw ConfigServer::InvalidArgumentsException();          
+    }
+    this->_cgi.clear();
+    for (filevector::iterator i = args.begin(); i < args.end(); i++)
+    {
+        size_t sep = i->find(";");
+        this->_cgi.insert(i->substr(0, sep));
+    }
 }
 
 std::string ConfigServer::get_root() const
@@ -471,6 +524,11 @@ ConfigServer & ConfigServer::getDefaultServer()
     return ConfigServer::_defaultServer;
 }
 
+std::string  ConfigServer::get_Upload_pass()const
+{
+    return this->_uploadPass;
+} 
+
 ConfigServer  ConfigServer::getlocationforRequest(std::string const path, std::string &locationpath)
 {
     std::string::size_type  len = path.size();
@@ -525,20 +583,21 @@ std::ostream	&operator<<(std::ostream &out, const ConfigServer &server) {
 	}
     out << "upload_pass " << server._uploadPass << std::endl; 
 	out << "body_size: " << server._client_body_buffer_size << std::endl;
-	out << "cgi_param:" << std::endl;
-	for (std::map<std::string, std::string>::const_iterator i = server._cgi_param.begin(); i != server._cgi_param.end(); i++)
-		out << "\t" << i->first << " = " << i->second << std::endl;
 	out << "cgi_pass:	" << server._cgi_pass << std::endl;
 	out << "methods: ";
 	for (std::set<std::string>::iterator i = server._allowed_methods.begin(); i != server._allowed_methods.end(); i++)
 		out << " " << *i;
+        
 	out << std::endl;
+    out << "cgi: ";
+	for (std::set<std::string>::iterator i = server._cgi.begin(); i != server._cgi.end(); i++)
+		out << " " << *i;
+    out << std::endl;
 	out << "autoindex " << (server._autoindex ? "on" : "off") << std::endl;
 	out << "index: ";
 	for (filevector::const_iterator i = server._index.begin(); i != server._index.end(); i++)
 		out << *i << " ";
 	out << std::endl;
-	out << "alias: " << server._alias << std::endl;
 	for (std::map<std::string, ConfigServer>::const_iterator i = server._location.begin(); i != server._location.end(); i++) {
 		out << std::endl << "LOCATION " << i->first << std::endl;
 		out << i->second << std::endl;

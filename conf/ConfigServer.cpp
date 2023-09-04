@@ -100,10 +100,9 @@ int ConfigServer::parseServer(unsigned int &index, filevector &file)
         {
             if (file[index] == "location")
             {
-                // std::cout << "directive location  " << directive << std::endl;
                 ConfigServer location;
                 std::string locationName;
-
+                std::string root = get_root();
                 if (directive != "")
                 {
                     (this->*ConfigServer::serverParsingMap[directive])(args);
@@ -114,6 +113,9 @@ int ConfigServer::parseServer(unsigned int &index, filevector &file)
                 if (file[index] == "{" || file[index] == "}")
                     return 0;
                 locationName = file[index];
+                std::string concat = root + locationName;
+                if (!directoryExists(concat.c_str()))
+                    throw ConfigServer::directoryNotFound();
                 index++;
                 if (!location.parseLocation(index, file))
                     return 0;
@@ -293,23 +295,18 @@ void ConfigServer::addRoot(std::vector<std::string> args)
 {
     size_t sep;
     if (args.size() != 1 || this->_root != "")
-    {
-        // std::cout << "messi" << std::endl;
-
         throw ConfigServer::InvalidArgumentsException();
-    }
     sep = args[0].find(";");
-    this->_root = args[0].substr(0, sep);
+    args[0] = args[0].substr(0, sep);
+    if (!directoryExists(args[0].c_str()))
+        throw ConfigServer::directoryNotFound();
+    this->_root = args[0];
 }
 
 void ConfigServer::addServerName(std::vector<std::string> args)
 {
     if(args.size() != 1)
-    {
-        // std::cout << "messi" << std::endl;
         throw ConfigServer::InvalidArgumentsException();
-
-    }
     size_t sep = args[0].find(";"); 
     for (unsigned int i = 0; i < args.size(); i++)
         this->_server_name.push_back(args[i].substr(0, sep));
@@ -422,14 +419,25 @@ void ConfigServer::addAutoindex(std::vector<std::string> args)
         throw ConfigServer::InvalidArgumentsException();
 }
 
+bool ConfigServer::directoryExists(const char* path) {
+    struct stat info;
+    if (stat(path, &info) != 0)
+        return false;
+    return (info.st_mode & S_IFDIR) != 0;
+}
+
 void ConfigServer::addUpload(std::vector<std::string> args)
 {
     if (args.size() != 1)
         throw ConfigServer::InvalidArgumentsException();
     size_t sep = args[0].find(";");
     args[0] = args[0].substr(0, sep);
+    if (!directoryExists(args[0].c_str()))
+        throw ConfigServer::directoryNotFound();
     this->_uploadPass = args[0];
 }
+
+
 
 void ConfigServer::addCgi(std::vector<std::string> args)
 {
@@ -522,6 +530,11 @@ bool ConfigServer::getaliasSet() const
 ConfigServer & ConfigServer::getDefaultServer()
 {
     return ConfigServer::_defaultServer;
+}
+
+std::set<std::string> ConfigServer::getCgi() const
+{
+    return this->_cgi;
 }
 
 std::string  ConfigServer::get_Upload_pass()const

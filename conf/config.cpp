@@ -72,7 +72,7 @@ int Config::parse(const char *filename, confData &data)
             return 1;
         }   
     }
-    // std::cout << this->_server[0] << '\n';
+    std::cout << this->_server[0] << '\n';
     data.server = this->_server;
 
     return 0;

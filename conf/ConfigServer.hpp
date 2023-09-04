@@ -22,6 +22,7 @@ private:
     void    addUpload(std::vector<std::string> args);
     void    addCgi(std::vector<std::string> args);
 
+    bool directoryExists(const char* path);
     std::vector<t_listen>				_listen;
 	std::string							_root;
 
@@ -59,6 +60,13 @@ public:
             return "invalide argument exception in configuration file"; 
         }
     };
+    class directoryNotFound : public std::exception
+    {
+        virtual const char *what() const throw()
+        {
+            return "directory not found"; 
+        }
+    };
     static ConfigServer _initserverDefault(const char* filename);
     //getters 
     std::vector<t_listen> get_listen() const;
@@ -76,6 +84,8 @@ public:
     bool getaliasSet()const;
     std::string get_Upload_pass()const;
     static ConfigServer &getDefaultServer();
+    std::set<std::string> getCgi() const;
+    
 
     ConfigServer    getlocationforRequest(std::string const path, std::string &locationPath);
     friend std::ostream& operator <<(std::ostream& out, const ConfigServer& server);

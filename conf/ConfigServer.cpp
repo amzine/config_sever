@@ -403,7 +403,6 @@ void ConfigServer::addIndex(std::vector<std::string> args)
         throw ConfigServer::InvalidArgumentsException();
     size_t sep = args[0].find(";");
     args[0] = args[0].substr(0, sep);
-    std::cout <<RED<< args[0] <<RESET<< std::endl;
     this->_index.insert(this->_index.end(), args.begin(), args.end());
 }
 

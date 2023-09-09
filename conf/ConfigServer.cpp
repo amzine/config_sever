@@ -279,7 +279,6 @@ void ConfigServer::addlisten(std::vector<std::string> args)
     {
         listen.host = args[0].substr(0, sep);
         sep++;
-        size_t nm = args[0].find(";"); 
         std::string portstr = args[0].substr(sep, 4);
         if (isDigits(portstr))
         {
@@ -316,6 +315,7 @@ void    ConfigServer::addErrorPage(std::vector<std::string> args)
 {
     std::vector<int> codes;
     std::string     uri = "";
+    std::stringstream inst;
     size_t  len = args.size();
 
     for (size_t i = 0; i < len; i++)
@@ -331,9 +331,20 @@ void    ConfigServer::addErrorPage(std::vector<std::string> args)
     }
     if (uri == "")
         throw ConfigServer::InvalidArgumentsException();
-    size_t sep = uri.find(";");     
+    size_t sep = uri.find(";");
+    uri = uri.substr(0, sep);
+    if (!directoryExists(uri.c_str()))
+        throw ConfigServer::directoryNotFound();
+    
     for (std::vector<int>::iterator i = codes.begin(); i != codes.end(); i++)
-        this->_error_page[*i] = uri.substr(0, sep);
+    {
+        inst << *i;
+        this->_error_page[*i] = uri + inst.str() + ".html";
+        inst.str("");
+        inst.clear();
+    }
+
+
 }
 
 void    ConfigServer::addclientbodybuffersize(std::vector<std::string> args)
@@ -392,6 +403,7 @@ void ConfigServer::addIndex(std::vector<std::string> args)
         throw ConfigServer::InvalidArgumentsException();
     size_t sep = args[0].find(";");
     args[0] = args[0].substr(0, sep);
+    std::cout <<RED<< args[0] <<RESET<< std::endl;
     this->_index.insert(this->_index.end(), args.begin(), args.end());
 }
 

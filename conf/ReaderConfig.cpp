@@ -50,7 +50,7 @@ bool ReaderConf::checkfile(std::string file)
     {
         if ((line.find("{") != std::string::npos) || (line.find("}") != std::string::npos))
             i++;
-        else if (size_t found  = line.find_first_not_of("\n\t ") == std::string::npos)
+        else if (line.find_first_not_of("\n\t ") == std::string::npos)
             continue;
         else if(line.find(';') == std::string::npos)
             return false;

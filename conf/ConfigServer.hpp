@@ -67,6 +67,13 @@ public:
             return "directory not found"; 
         }
     };
+     class  fileNotFound : public std::exception
+    {
+        virtual const char *what() const throw()
+        {
+            return "file does not exist!!"; 
+        }
+    };
     static ConfigServer _initserverDefault(const char* filename);
     //getters 
     std::vector<t_listen> get_listen() const;

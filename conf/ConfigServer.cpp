@@ -314,6 +314,7 @@ void ConfigServer::addServerName(std::vector<std::string> args)
 void    ConfigServer::addErrorPage(std::vector<std::string> args)
 {
     std::vector<int> codes;
+    std::string fullPath;
     std::string     uri = "";
     std::stringstream inst;
     size_t  len = args.size();
@@ -339,6 +340,11 @@ void    ConfigServer::addErrorPage(std::vector<std::string> args)
     for (std::vector<int>::iterator i = codes.begin(); i != codes.end(); i++)
     {
         inst << *i;
+        fullPath = uri + inst.str() + ".html";
+        std::cout << fullPath << std::endl;
+        std::ifstream filest(fullPath);
+        if (!filest.is_open())
+            throw ConfigServer::fileNotFound();
         this->_error_page[*i] = uri + inst.str() + ".html";
         inst.str("");
         inst.clear();
